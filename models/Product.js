@@ -5,42 +5,29 @@ const ProductSchema = mongoose.Schema({
     type: String,
     require: true,
   },
-  description: {
+  heard: {
     type: String,
     require: true,
-  },
-  author: {
-    type: String,
-    require: true,
-  },
-  number: {
-    type: Number,
   },
   category: {
     type: String,
     require: true,
   },
-  view: {
-    type: Number,
-    require: true,
-  },
-  image: {
+  category2: {
     type: String,
     require: true,
   },
-  episodes: {
-    details: {
-      type: String,
-      require: true,
-    },
-    story: {
-      type: String,
-      require: true,
-    },
-    price: {
-      type: String,
-      require: true,
-    },
+  red: {
+    type: String,
+    require: true,
+  },
+  detail: {
+    type: String,
+    require: true,
+  },
+  txt: {
+    type: String,
+    require: true,
   },
 });
 

@@ -5,17 +5,17 @@ const bcrypt = require("bcryptjs");
 
 //!---------------------------------------------------------------------------------------
 router.post("/register", async (req, res) => {
-  const { email, username, password } = req.body;
+  const { email, name, password } = req.body;
   User.findOne({ email: email }).then((user) => {
     if (user) {
       res.json({ message: "มี Email นี้ในระบบแล้ว" });
     } else {
-      User.findOne({ username: username }).then((user) => {
+      User.findOne({ name: name }).then((user) => {
         if (user) {
           res.json({ message: "มี Username นี้ในระบบแล้ว" });
         } else {
           const newUser = new User({
-            username,
+            name,
             email,
             password,
           });
@@ -47,36 +47,39 @@ const jwtOptions = {
   secretOrKey: "MY_SECRET_KEY", //SECRETเดียวกับตอนencode
 };
 
-const loginMiddleware = (req, res, next) => {
-  const { username, password } = req.body;
-  User.findOne({ username: username, password: password }).then((user) => {
-    if (user) next();
-    else res.send("username หรือ password ไม่ถูกต้อง");
-  });
-
-  //ถ้า username password ไม่ตรงให้ส่งว่า Wrong username and password
+const loginMiddleware = async (req, res, next) => {
+  const { name, password } = req.body;
+  let result = await User.findOne({ name: name })
+  if (result != null) {
+    if (bcrypt.compareSync(password, result.password)) {
+      next();
+    } else {
+      res.json({ message: "รหัสผ่านไม่ถูกต้อง" });
+    }
+  } else res.send("username ไม่ถูกต้อง");
 };
-
+//!---------------------สร้าง jwt ให้ client---------------------------
 router.post("/login", loginMiddleware, (req, res) => {
   const payload = {
-    sub: req.body.username,
-    iat: new Date().getTime(), //มาจากคำว่า issued at time (สร้างเมื่อ)
+    sub: req.body.name,
+    iat: new Date().getTime(),
   };
-  const SECRET = "MY_SECRET_KEY"; //ในการใช้งานจริง คีย์นี้ให้เก็บเป็นความลับ
+  //console.log(payload);
+  const SECRET = "MY_SECRET_KEY";
   res.send(jwt.encode(payload, SECRET));
 });
-
+//!------------------------------------------------------------------
 const jwtAuth = new JwtStrategy(jwtOptions, (req, payload, done) => {
-  const { username } = req.body;
-  User.findOne({ username: username });
-  if (payload.sub === "kennaruk") done(null, true);
+  const { name } = req.body;
+  User.findOne({ name: name });
+  if (payload.sub === name) done(null, true);
   else done(null, false);
 });
 const passport = require("passport");
 passport.use(jwtAuth);
 const requireJWTAuth = passport.authenticate("jwt", { session: false });
 
-router.get("/", requireJWTAuth, (req, res) => {
+router.get("/d", requireJWTAuth, (req, res) => {
   res.send("ยอดเงินคงเหลือ 50");
 });
 

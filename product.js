@@ -2,26 +2,20 @@ const express = require("express");
 const router = express.Router();
 const Product = require("./models/Product");
 
-router.get("/getProduct", (req, res) => {
-  Product.find = req.body;
-  res.json(body);
+router.get("/getnewproduct", async (req, res) => {
+  let result = await Product.find().limit(5).sort({_id:-1})
+  res.json(result);
 });
-router.post("/addProduct", (req, res) => {
-  const {
-    title,
-    description,
-    author,
-    image,
-    category,
-    episodes: { details, story, price },
-  } = req.body;
+router.post("/addnovel", (req, res) => {
+  const { title, heard, category, category2, red, detail, txt } = req.body;
   const newProduct = new Product({
     title,
-    description,
-    author,
+    heard,
     category,
-    image,
-    episodes: { details, story, price },
+    category2,
+    red,
+    detail,
+    txt,
   });
   newProduct
     .save()
